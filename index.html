@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+    <style>
+      body {
+        background: #eee;
+      }
+      .box {
+        width: 300px;
+        height: 300px;
+        margin: 50px auto 20px auto;
+        display: table;
+      }
+      .winning {
+        text-align: center;
+        margin: 0 auto;
+      }
+      .box-item {
+        width: 100px;
+        height: 100px;
+        line-height: 100px;
+        text-align: center;
+        display: inline-table;
+        border: 1px solid #fff;
+        box-sizing: border-box;
+      }
+      .blala {
+        font-size: 20px;
+        background: burlywood;
+        cursor: pointer;
+      }
+      .select {
+        background: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="box">
+        <div
+          class="box-item"
+          v-for="(item, index) in boxItems"
+          :key="index"
+          :class="{'select': index === selectIndex}"
+        >
+          <div v-if="index === 4" class="blala" @click="blala">抽奖</div>
+          <div v-else>{{item}}</div>
+        </div>
+      </div>
+      <div class="winning" v-if="winningIndex > -1">
+        恭喜你，中奖了——{{boxItems[winningIndex]}}
+      </div>
+    </div>
+  </body>
+  <script>
+    const vm = new Vue({
+      el: '#app',
+      data: {
+        selectIndex: -1,
+        boxItems: [
+          'coco',
+          '蜜雪冰城',
+          '七分甜',
+          '茶百道',
+          '',
+          '乐乐茶',
+          'lemonTea',
+          '奈雪的茶',
+          '茶颜悦色'
+        ],
+        winningIndex: -1
+      },
+      methods: {
+        blala() {
+          // 清除中奖索引记录
+          this.winningIndex = -1
+          // 一个顺时针循环的中奖数组
+          let completeAry = [0, 1, 2, 5, 8, 7, 6, 3]
+          // 随机一个中奖数字,防止中奖数字为4,直接取中奖数组中的数字作为中奖数字
+          let winningNum = completeAry[Math.floor(Math.random() * completeAry.length)]
+          let winningAry = []
+          for (let i = 0; i < completeAry.length; i++) {
+            if (completeAry[i] === winningNum) {
+              winningAry = completeAry.slice(0, i + 1)
+              break
+            }
+          }
+          let loopAry = [
+            ...completeAry,
+            ...completeAry,
+            ...completeAry,
+            ...winningAry
+          ]
+          // 当前选中标识
+          let select = -1
+          // 速度标识
+          // 0.1- 0 —— ary.length-9
+          // 0.2- ary.length-9 —— ary.length-4
+          // 0.3- ary.length-4 —— ary.length-1
+          let speed = 0.1
+          var fn = () => {
+            this.selectIndex =
+              select < loopAry.length - 1
+                ? loopAry[++select]
+                : loopAry[loopAry.length - 1]
+            // speed
+            if (select >= loopAry.length - 8 && select < loopAry.length - 5) {
+              clearInterval(timer)
+              speed = 0.18
+              console.log('-------current speed------', speed)
+              timer = setInterval(fn, speed * 1000)
+            } else if (select >= loopAry.length - 5) {
+              clearInterval(timer)
+              speed = 0.25
+              console.log('-------current speed------', speed)
+              timer = setInterval(fn, speed * 1000)
+            }
+            // 清除定时器
+            if (select === loopAry.length - 1) {
+              console.log('winningNum---', winningNum)
+              this.winningIndex = winningNum
+              clearInterval(timer)
+            }
+          }
+          var timer = setInterval(fn, speed * 1000)
+        }
+      }
+    })
+  </script>
+</html>
